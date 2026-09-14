@@ -1,0 +1,59 @@
+const { test, expect } = require('@playwright/test');
+const { LoginWithValidUsernameAndPage } = require('../pages/LoginWithValidUsernameAndPage.js');
+
+test("login with valid username and password username :Admin password: admin123", async ({ page }) => {
+    const pageObject = new LoginWithValidUsernameAndPage(page);
+    await pageObject.goto();
+    if (process.env.QA_AI_RECORD_NETWORK === "1") {
+      const isBinaryType = (ct) => /^(image|font|audio|video)\//i.test(ct) || /application\/(font-|octet-stream)/i.test(ct);
+      const isStaticType = (ct, url) => /text\/css|javascript|text\/html/i.test(ct) || /\.(png|jpg|jpeg|gif|svg|ico|woff2?|ttf|eot|otf|css|js)(\?|$)/i.test(url);
+      const shouldSkip = (response) => {
+        const status = response.status();
+        const headers = response.headers();
+        const contentType = (headers['content-type'] || '').toLowerCase();
+        const url = response.url();
+        return status < 400 && (isBinaryType(contentType) || isStaticType(contentType, url));
+      };
+      page.on('response', async (response) => {
+        try {
+          const request = response.request();
+          const method = request.method();
+          const url = response.url();
+          const status = response.status();
+          if (shouldSkip(response)) return;
+          const headers = response.headers();
+          const contentType = (headers['content-type'] || '').toLowerCase();
+          const isTextJson = /application\/json|text\/(plain|html|xml|csv)/i.test(contentType);
+          const isAuthRelated = /(login|auth|token|signin|password)/i.test(url);
+          let body = '';
+          let truncated = false;
+          if (isTextJson && !isAuthRelated) {
+            const raw = await response.text().catch(() => '');
+            if (raw.length > 10240) {
+              body = raw.slice(0, 10240);
+              truncated = true;
+            } else {
+              body = raw;
+            }
+          }
+          let duration;
+          try {
+            const t = request.timing();
+            if (t && typeof t.startTime === 'number' && typeof t.responseEnd === 'number') {
+              duration = Math.max(0, Math.round(t.responseEnd - t.startTime));
+            }
+          } catch (e) {}
+          const entry = { method, url, status };
+          if (typeof duration === 'number') entry.duration = duration;
+          if (body) {
+            entry.body = body;
+            if (truncated) entry.truncated = true;
+          }
+          console.log('QA_AI_NETWORK|' + JSON.stringify(entry));
+        } catch (e) {}
+      });
+    }
+    await pageObject.fillUsername("Admin");
+    await pageObject.fillPassword(process.env.RECORDED_PASSWORD || '');
+    await expect(page).toHaveURL("https://opensource-demo.orangehrmlive.com/web/index.php/auth/login");
+});

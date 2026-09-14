@@ -1,0 +1,18 @@
+const { expect } = require('@playwright/test');
+
+class ReproduceHomepageVideoIssuePage {
+  constructor(page) {
+    this.page = page;
+    this.gbp = page.getByRole("button", { name: "GBP (£)" }).first();
+  }
+
+  async goto() {
+    await this.page.goto("https://cf-uat1.ego.co.uk/");
+  }
+
+  async clickGbp() {
+    await this.gbp.click();
+  }
+}
+
+module.exports = { ReproduceHomepageVideoIssuePage };

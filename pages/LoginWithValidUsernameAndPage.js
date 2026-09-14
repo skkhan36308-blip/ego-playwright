@@ -1,0 +1,28 @@
+const { expect } = require('@playwright/test');
+
+class LoginWithValidUsernameAndPage {
+  constructor(page) {
+    this.page = page;
+    this.username = page.locator("#app").getByPlaceholder("Username");
+    this.password = page.locator("#app").getByPlaceholder("Password");
+    this.login = page.locator("#app").getByRole("button", { name: "Login" });
+  }
+
+  async goto() {
+    await this.page.goto("https://opensource-demo.orangehrmlive.com/web/index.php/auth/login");
+  }
+
+  async fillUsername(value) {
+    await this.username.fill(value);
+  }
+
+  async fillPassword(value) {
+    await this.password.fill(value);
+  }
+
+  async clickLogin() {
+    await this.login.click();
+  }
+}
+
+module.exports = { LoginWithValidUsernameAndPage };

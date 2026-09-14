@@ -1,19 +1,25 @@
 const { expect } = require('@playwright/test');
 
-class SourceJiraScrum26RequirementPage {
+class SourceBugReproductionGoalCreatePage {
   constructor(page) {
     this.page = page;
     this.username = page.getByRole("textbox").first();
+    this.username2 = page.getByRole("textbox").first();
     this.password = page.getByRole("textbox").first();
     this.password2 = page.getByRole("textbox").first();
+    this.login = page.getByRole("button", { name: "Login", exact: true });
   }
 
   async goto() {
     await this.page.goto("https://opensource-demo.orangehrmlive.com/web/index.php/auth/login");
   }
 
-  async fillUsername(value) {
-    await this.username.fill(value);
+  async clickUsername() {
+    await this.username.click();
+  }
+
+  async fillUsername2(value) {
+    await this.username2.fill(value);
   }
 
   async clickPassword() {
@@ -23,6 +29,10 @@ class SourceJiraScrum26RequirementPage {
   async fillPassword2(value) {
     await this.password2.fill(value);
   }
+
+  async clickLogin() {
+    await this.login.click();
+  }
 }
 
-module.exports = { SourceJiraScrum26RequirementPage };
+module.exports = { SourceBugReproductionGoalCreatePage };
